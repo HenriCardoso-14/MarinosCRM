@@ -183,8 +183,12 @@ async function saveAssinatura() {
                     data_pagamento: payload.data_inicio,
                     valor: payload.valor
                 }]);
+                
+                const selectCliente = document.getElementById('assinaturaCliente');
+                const nomeCliente = selectCliente.options[selectCliente.selectedIndex].text;
+
                 await db.from('movimentacoes').insert([{
-                    descricao: `Assinatura - Primeiro Pagamento`,
+                    descricao: `Assinatura - Primeiro Pagamento (${nomeCliente})`,
                     valor: payload.valor,
                     tipo: 'Entrada',
                     categoria: 'Assinatura',
@@ -224,6 +228,7 @@ function openRenovarModal(id, nomeCliente, dataVencimentoAtual, cicloMeses, valo
     const novoVencimento = atual.toISOString().split('T')[0];
 
     document.getElementById('renovarId').value = id;
+    document.getElementById('renovarNomeCliente').value = nomeCliente;
     document.getElementById('renovarValor').value = valor;
     document.getElementById('renovarNovoVencimento').value = novoVencimento;
     
@@ -238,6 +243,7 @@ function openRenovarModal(id, nomeCliente, dataVencimentoAtual, cicloMeses, valo
 
 async function confirmarRenovacao() {
     const id = document.getElementById('renovarId').value;
+    const nomeCliente = document.getElementById('renovarNomeCliente').value;
     const novoVencimento = document.getElementById('renovarNovoVencimento').value;
     const valor = document.getElementById('renovarValor').value;
     const dataPagamento = new Date().toISOString().split('T')[0];
@@ -257,7 +263,7 @@ async function confirmarRenovacao() {
         // Registra movimentação no financeiro
         const { error: err3 } = await db.from('movimentacoes')
             .insert([{
-                descricao: `Renovação de Assinatura`,
+                descricao: `Renovação de Assinatura (${nomeCliente})`,
                 valor: valor,
                 tipo: 'Entrada',
                 categoria: 'Assinatura',
@@ -270,6 +276,6 @@ async function confirmarRenovacao() {
         loadAssinaturas();
     } catch (error) {
         console.error(error);
-        showToast("Erro ao registrar renovação.", "danger");
+        showToast("Erro ao processar renovação.", "danger");
     }
 }
