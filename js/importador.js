@@ -107,26 +107,34 @@ async function processRow(row, rowIndex) {
     const nome = String(nomeRaw).trim();
     let telefone = String(row['Telefone'] || row['TELEFONE'] || row['telefone'] || '').trim();
     const planoName = String(row['Plano'] || row['PLANO'] || row['plano'] || '').trim();
-    const dataInicioRaw = row['Data Inicio'] || row['Data Início'] || row['DATA INICIO'] || row['data inicio'] || '';
+    const dataInicioRaw = row['Data Inicio'] || row['Data Início'] || row['Data de inicio'] || row['DATA INICIO'] || row['data inicio'] || '';
+    const valorRaw = row['Valor'] || row['VALOR'] || row['valor'] || '';
+    const renovacaoRaw = row['Renovação'] || row['renovacao'] || row['renovação'] || row['Renovacao'] || row['RENOVAÇÃO'] || '';
 
     // Limpa telefone, deixando só números
     telefone = telefone.replace(/\D/g, '');
 
-    // 1. Cadastrar Cliente
+    // 1. Cadastrar Cliente ou buscar existente
     let clienteId;
-    const { data: cliData, error: cliErr } = await db
-        .from('clientes')
-        .insert([{ matricula: matricula ? matricula : null, nome, telefone }])
-        .select('id')
-        .single();
-
-    if (cliErr) {
-        logMsg(`Linha ${rowIndex}: Erro ao inserir cliente ${nome} - ${cliErr.message}`, true);
-        return;
-    }
+    const { data: existingClients, error: extErr } = await db.from('clientes').select('id').ilike('nome', nome).limit(1);
     
-    clienteId = cliData.id;
-    logMsg(`Linha ${rowIndex}: Cliente ${nome} inserido.`);
+    if (existingClients && existingClients.length > 0) {
+        clienteId = existingClients[0].id;
+        logMsg(`Linha ${rowIndex}: Cliente ${nome} já existe. Vinculando dados...`);
+    } else {
+        const { data: cliData, error: cliErr } = await db
+            .from('clientes')
+            .insert([{ matricula: matricula ? matricula : null, nome, telefone }])
+            .select('id')
+            .single();
+
+        if (cliErr) {
+            logMsg(`Linha ${rowIndex}: Erro ao inserir cliente ${nome} - ${cliErr.message}`, true);
+            return;
+        }
+        clienteId = cliData.id;
+        logMsg(`Linha ${rowIndex}: Cliente ${nome} inserido.`);
+    }
 
     // 2. Verificar se tem Assinatura atrelada a preencher
     if (planoName && dataInicioRaw) {
@@ -134,7 +142,7 @@ async function processRow(row, rowIndex) {
         const planoMatch = planosCache.find(p => p.nome.toLowerCase() === planoName.toLowerCase());
         
         if (!planoMatch) {
-            logMsg(`Linha ${rowIndex}: Plano "${planoName}" não encontrado no sistema. Assinatura ignorada.`, true);
+            logMsg(`Linha ${rowIndex}: Plano "${planoName}" não encontrado no sistema. Vá na aba Planos e cadastre-o primeiro. Assinatura ignorada.`, true);
             return;
         }
 
@@ -145,16 +153,31 @@ async function processRow(row, rowIndex) {
         }
 
         // Calcula Vencimento
-        const dInicio = new Date(dataInicio);
-        dInicio.setUTCHours(12); // Previne problema de fuso horário voltar um dia
-        dInicio.setMonth(dInicio.getMonth() + (planoMatch.ciclo_meses || 1));
-        const dataVencimento = dInicio.toISOString().split('T')[0];
+        let dataVencimento;
+        if (renovacaoRaw) {
+            dataVencimento = parseExcelDate(renovacaoRaw);
+        }
+        if (!dataVencimento) {
+            const dInicio = new Date(dataInicio);
+            dInicio.setUTCHours(12); // Previne problema de fuso horário voltar um dia
+            dInicio.setMonth(dInicio.getMonth() + (planoMatch.ciclo_meses || 1));
+            dataVencimento = dInicio.toISOString().split('T')[0];
+        }
+
+        // Parse do Valor
+        let valorFinal = planoMatch.valor;
+        if (valorRaw) {
+            const valClean = String(valorRaw).replace('R$', '').replace(',', '.').trim();
+            if (!isNaN(parseFloat(valClean))) {
+                valorFinal = parseFloat(valClean);
+            }
+        }
 
         // Cria a assinatura
         const { error: assErr } = await db.from('assinaturas').insert([{
             cliente_id: clienteId,
             plano_id: planoMatch.id,
-            valor: planoMatch.valor,
+            valor: valorFinal,
             data_inicio: dataInicio,
             data_vencimento: dataVencimento,
             situacao: 'Ativo'
@@ -163,7 +186,7 @@ async function processRow(row, rowIndex) {
         if (assErr) {
             logMsg(`Linha ${rowIndex}: Erro ao criar assinatura para ${nome} - ${assErr.message}`, true);
         } else {
-            logMsg(`Linha ${rowIndex}: Assinatura do plano ${planoMatch.nome} vinculada para ${nome}.`);
+            logMsg(`Linha ${rowIndex}: Assinatura do plano ${planoMatch.nome} (R$ ${valorFinal}) vinculada para ${nome}.`);
         }
     }
 }
