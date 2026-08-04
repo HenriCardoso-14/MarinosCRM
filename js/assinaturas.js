@@ -1,14 +1,17 @@
 let assinaturaModalInstance;
 let renovarModalInstance;
+let historicoModalInstance;
 let planosDisponiveis = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
     assinaturaModalInstance = new bootstrap.Modal(document.getElementById('assinaturaModal'));
     renovarModalInstance = new bootstrap.Modal(document.getElementById('renovarModal'));
+    historicoModalInstance = new bootstrap.Modal(document.getElementById('historicoModal'));
     
     // Auto-calcula vencimento baseado no plano
     document.getElementById('assinaturaPlano').addEventListener('change', updatePlanoInfo);
     document.getElementById('assinaturaInicio').addEventListener('change', calculateVencimento);
+    document.getElementById('searchAssinatura').addEventListener('input', loadAssinaturas);
 
     await Promise.all([loadClientesDropdown(), loadPlanos()]);
     loadAssinaturas();
@@ -61,14 +64,22 @@ function calculateVencimento() {
 
 async function loadAssinaturas() {
     try {
-        const { data: assinaturas, error } = await db
+        const searchTerm = document.getElementById('searchAssinatura') ? document.getElementById('searchAssinatura').value.trim() : '';
+        
+        let query = db
             .from('assinaturas')
             .select(`
                 id, valor, data_inicio, data_vencimento, situacao,
-                clientes (nome, telefone),
+                clientes!inner (nome, telefone),
                 planos (nome, ciclo_meses)
             `)
             .order('data_vencimento', { ascending: true });
+
+        if (searchTerm) {
+            query = query.ilike('clientes.nome', `%${searchTerm}%`);
+        }
+
+        const { data: assinaturas, error } = await query;
 
         if (error) throw error;
 
@@ -105,6 +116,9 @@ async function loadAssinaturas() {
                     <button class="btn btn-sm btn-glass text-success me-1" onclick="openRenovarModal('${a.id}', '${a.clientes.nome}', '${a.data_vencimento}', ${a.planos.ciclo_meses}, ${a.valor})" title="Renovar / Registrar Pagamento">
                         <i class="fa-solid fa-rotate"></i>
                     </button>
+                    <button class="btn btn-sm btn-glass text-info me-1" onclick="openHistoricoAssinatura('${a.id}')" title="Histórico de Renovações">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </button>
                     <button class="btn btn-sm btn-glass text-accent me-1" onclick="editAssinatura('${a.id}')" title="Editar">
                         <i class="fa-solid fa-pen"></i>
                     </button>
@@ -117,6 +131,33 @@ async function loadAssinaturas() {
     } catch (error) {
         console.error(error);
         showToast("Erro ao carregar assinaturas.", "danger");
+    }
+}
+
+async function openHistoricoAssinatura(assinaturaId) {
+    try {
+        const { data, error } = await db.from('pagamentos_assinatura')
+            .select('*')
+            .eq('assinatura_id', assinaturaId)
+            .order('data_pagamento', { ascending: false });
+
+        if (error) throw error;
+
+        const tbody = document.getElementById('historico-tbody');
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="2" class="text-center text-muted py-3">Nenhuma renovação registrada.</td></tr>';
+        } else {
+            tbody.innerHTML = data.map(p => `
+                <tr>
+                    <td>${formatDate(p.data_pagamento)}</td>
+                    <td class="fw-bold text-success">${formatCurrency(p.valor)}</td>
+                </tr>
+            `).join('');
+        }
+        historicoModalInstance.show();
+    } catch(err) {
+        console.error(err);
+        showToast("Erro ao carregar histórico.", "danger");
     }
 }
 

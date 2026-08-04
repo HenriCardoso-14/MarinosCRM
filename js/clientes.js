@@ -186,11 +186,26 @@ async function openHistorico(clienteId) {
     try {
         const { data: assData } = await db.from('assinaturas').select('*, planos(nome)').eq('cliente_id', clienteId).eq('situacao', 'Ativo').single();
         if (assData) {
+            let pagamentosHtml = '';
+            const { data: pags } = await db.from('pagamentos_assinatura').select('*').eq('assinatura_id', assData.id).order('data_pagamento', {ascending: false});
+            
+            if(pags && pags.length > 0) {
+                pagamentosHtml = `
+                    <div class="mt-3 pt-3" style="border-top: 1px solid rgba(255,255,255,0.1)">
+                        <strong class="text-main d-block mb-2">Renovações Registradas:</strong>
+                        <ul class="list-unstyled mb-0" style="max-height: 100px; overflow-y: auto;">
+                            ${pags.map(p => `<li class="small mb-1"><i class="fa-solid fa-check text-success me-2"></i> ${formatDate(p.data_pagamento)} - ${formatCurrency(p.valor)}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
             document.getElementById('historicoAssinatura').innerHTML = `
                 <div class="p-3 rounded" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);">
                     <strong class="text-main">Plano:</strong> ${assData.planos.nome} <br>
                     <strong class="text-main">Vencimento:</strong> ${formatDate(assData.data_vencimento)} <br>
                     <strong class="text-main">Valor:</strong> ${formatCurrency(assData.valor)}
+                    ${pagamentosHtml}
                 </div>
             `;
         } else {
