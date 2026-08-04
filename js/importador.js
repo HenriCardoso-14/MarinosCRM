@@ -96,20 +96,28 @@ function parseExcelDate(dateVal) {
 }
 
 async function processRow(row, rowIndex) {
-    const matriculaRaw = row['Matricula'] || row['Matrícula'] || row['MATRICULA'] || row['matricula'] || '';
+    let matriculaRaw = '', nomeRaw = '', telefoneRaw = '', planoName = '', dataInicioRaw = '', valorRaw = '', renovacaoRaw = '';
+    
+    // Busca chaves dinamicamente para evitar problemas com espaços ou acentos nas colunas
+    for (const key in row) {
+        const lower = key.toLowerCase().trim();
+        if (lower === 'matricula' || lower === 'matrícula') matriculaRaw = row[key];
+        else if (lower === 'nome') nomeRaw = row[key];
+        else if (lower === 'telefone') telefoneRaw = row[key];
+        else if (lower === 'plano') planoName = String(row[key] || '').trim();
+        else if (lower === 'data inicio' || lower === 'data início' || lower === 'data de inicio') dataInicioRaw = row[key];
+        else if (lower === 'valor' || lower === 'preço' || lower === 'preco') valorRaw = row[key];
+        else if (lower === 'renovação' || lower === 'renovacao' || lower === 'data de renovação' || lower === 'data de renovacao') renovacaoRaw = row[key];
+    }
+
     const matricula = String(matriculaRaw).trim();
-    const nomeRaw = row['Nome'] || row['NOME'] || row['nome'];
     if (!nomeRaw) {
         logMsg(`Linha ${rowIndex}: Ignorada, coluna Nome vazia.`, true);
         return;
     }
 
     const nome = String(nomeRaw).trim();
-    let telefone = String(row['Telefone'] || row['TELEFONE'] || row['telefone'] || '').trim();
-    const planoName = String(row['Plano'] || row['PLANO'] || row['plano'] || '').trim();
-    const dataInicioRaw = row['Data Inicio'] || row['Data Início'] || row['Data de inicio'] || row['DATA INICIO'] || row['data inicio'] || '';
-    const valorRaw = row['Valor'] || row['VALOR'] || row['valor'] || '';
-    const renovacaoRaw = row['Renovação'] || row['renovacao'] || row['renovação'] || row['Renovacao'] || row['RENOVAÇÃO'] || '';
+    let telefone = String(telefoneRaw || '').trim();
 
     // Limpa telefone, deixando só números
     telefone = telefone.replace(/\D/g, '');
