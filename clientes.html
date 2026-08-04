@@ -67,11 +67,14 @@
 
             <!-- Main Content -->
             <div class="col py-3 main-content">
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
                     <h2 class="mb-0">Gestão de Clientes</h2>
-                    <button class="btn btn-accent" onclick="openClienteModal()">
-                        <i class="fa-solid fa-plus me-2"></i>Novo Cliente
-                    </button>
+                    <div class="d-flex gap-2 w-100 justify-content-md-end" style="max-width: 500px;">
+                        <input type="text" class="form-control" id="searchCliente" placeholder="Buscar nome ou telefone..." onkeyup="filterClientes()">
+                        <button class="btn btn-accent text-nowrap" onclick="openClienteModal()">
+                            <i class="fa-solid fa-plus me-2"></i>Novo
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Tabela -->

@@ -137,7 +137,7 @@ async function processRow(row, rowIndex) {
     }
 
     // 2. Verificar se tem Assinatura atrelada a preencher
-    if (planoName && dataInicioRaw) {
+    if (planoName && (dataInicioRaw || renovacaoRaw)) {
         // Tenta achar o plano cadastrado no banco ignorando maiusculas/minusculas
         const planoMatch = planosCache.find(p => p.nome.toLowerCase() === planoName.toLowerCase());
         
@@ -146,22 +146,35 @@ async function processRow(row, rowIndex) {
             return;
         }
 
-        const dataInicio = parseExcelDate(dataInicioRaw);
-        if (!dataInicio) {
-            logMsg(`Linha ${rowIndex}: Data Inicio inválida para ${nome}. Assinatura ignorada.`, true);
-            return;
-        }
+        let dataInicio = null;
+        let dataVencimento = null;
 
-        // Calcula Vencimento
-        let dataVencimento;
+        if (dataInicioRaw) {
+            dataInicio = parseExcelDate(dataInicioRaw);
+        }
         if (renovacaoRaw) {
             dataVencimento = parseExcelDate(renovacaoRaw);
         }
-        if (!dataVencimento) {
+
+        // Se tem data inicio, mas nao vencimento: soma ciclo
+        if (dataInicio && !dataVencimento) {
             const dInicio = new Date(dataInicio);
-            dInicio.setUTCHours(12); // Previne problema de fuso horário voltar um dia
+            dInicio.setUTCHours(12); 
             dInicio.setMonth(dInicio.getMonth() + (planoMatch.ciclo_meses || 1));
             dataVencimento = dInicio.toISOString().split('T')[0];
+        }
+
+        // Se tem vencimento, mas nao inicio: subtrai ciclo
+        if (dataVencimento && !dataInicio) {
+            const dVenc = new Date(dataVencimento);
+            dVenc.setUTCHours(12);
+            dVenc.setMonth(dVenc.getMonth() - (planoMatch.ciclo_meses || 1));
+            dataInicio = dVenc.toISOString().split('T')[0];
+        }
+
+        if (!dataInicio || !dataVencimento) {
+            logMsg(`Linha ${rowIndex}: Datas inválidas para ${nome}. Assinatura ignorada.`, true);
+            return;
         }
 
         // Parse do Valor

@@ -14,13 +14,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadClientes();
 });
+let searchTimeout;
 
-async function loadClientes() {
+function filterClientes() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        const term = document.getElementById('searchCliente').value;
+        loadClientes(term);
+    }, 300);
+}
+
+async function loadClientes(searchTerm = '') {
     try {
-        const { data: clientes, error } = await db
-            .from('clientes')
-            .select('*')
-            .order('nome', { ascending: true });
+        let query = db.from('clientes').select('*').order('matricula', { ascending: false, nullsFirst: false });
+
+        if (searchTerm) {
+            query = query.or(`nome.ilike.%${searchTerm}%,telefone.ilike.%${searchTerm}%`);
+        }
+
+        const { data: clientes, error } = await query;
 
         if (error) throw error;
 
