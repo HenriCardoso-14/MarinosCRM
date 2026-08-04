@@ -76,6 +76,13 @@ async function loadFinanceiro() {
         document.getElementById('total-saidas').textContent = formatCurrency(totalSaidas);
         document.getElementById('lucro-liquido').textContent = formatCurrency(lucro);
         
+        const { data: assinaturasAtivas, error: errAss } = await db.from('assinaturas').select('valor').eq('situacao', 'Ativo');
+        let receitaAssinaturas = 0;
+        if (!errAss && assinaturasAtivas) {
+            receitaAssinaturas = assinaturasAtivas.reduce((acc, curr) => acc + parseFloat(curr.valor), 0);
+        }
+        document.getElementById('total-receita-assinaturas').textContent = formatCurrency(receitaAssinaturas);
+
         const cardLucro = document.getElementById('lucro-liquido').parentElement;
         if (lucro < 0) {
             cardLucro.className = 'glass-card p-4 border-danger text-danger';

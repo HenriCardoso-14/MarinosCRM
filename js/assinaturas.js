@@ -73,6 +73,15 @@ async function loadAssinaturas() {
         if (error) throw error;
 
         const tbody = document.getElementById('assinaturas-tbody');
+        
+        let receitaTotal = 0;
+        assinaturas.forEach(a => {
+            if (a.situacao === 'Ativo') {
+                receitaTotal += parseFloat(a.valor);
+            }
+        });
+        document.getElementById('totalReceitaAssinaturas').textContent = formatCurrency(receitaTotal);
+
         if (assinaturas.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">Nenhuma assinatura ativa.</td></tr>';
             return;
