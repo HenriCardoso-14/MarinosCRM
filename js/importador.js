@@ -230,3 +230,28 @@ async function processRow(row, rowIndex) {
         }
     }
 }
+
+async function limparBaseDeDados() {
+    if (!confirm("⚠️ ATENÇÃO: Isso vai apagar TODOS os Clientes, Assinaturas e Cortes do sistema. Essa ação é IRREVERSÍVEL. Tem certeza absoluta?")) {
+        return;
+    }
+    
+    const btn = document.getElementById('btnLimparBase');
+    const oldHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Apagando...';
+
+    try {
+        await db.from('cortes').delete().not('id', 'is', null);
+        await db.from('assinaturas').delete().not('id', 'is', null);
+        await db.from('clientes').delete().not('id', 'is', null);
+        
+        showToast("Base de dados de clientes limpa com sucesso!", "success");
+    } catch (err) {
+        console.error(err);
+        showToast("Erro ao limpar banco de dados.", "danger");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = oldHtml;
+    }
+}
