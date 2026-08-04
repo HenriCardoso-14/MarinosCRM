@@ -179,10 +179,29 @@ async function processRow(row, rowIndex) {
 
         // Parse do Valor
         let valorFinal = planoMatch.valor;
-        if (valorRaw) {
-            const valClean = String(valorRaw).replace('R$', '').replace(',', '.').trim();
-            if (!isNaN(parseFloat(valClean))) {
-                valorFinal = parseFloat(valClean);
+        if (valorRaw !== '' && valorRaw !== null && valorRaw !== undefined) {
+            if (typeof valorRaw === 'number') {
+                valorFinal = valorRaw;
+            } else {
+                let s = String(valorRaw).replace('R$', '').trim();
+                s = s.replace(/[^\d,\.-]/g, ''); 
+                const commaCount = (s.match(/,/g) || []).length;
+                const dotCount = (s.match(/\./g) || []).length;
+
+                if (commaCount > 0 && dotCount > 0) {
+                    s = s.replace(/\./g, '').replace(',', '.');
+                } else if (commaCount === 1 && dotCount === 0) {
+                    s = s.replace(',', '.');
+                } else if (commaCount > 1 && dotCount === 0) {
+                    s = s.replace(/,/g, '');
+                } else if (dotCount > 1 && commaCount === 0) {
+                    s = s.replace(/\./g, '');
+                }
+
+                const parsed = parseFloat(s);
+                if (!isNaN(parsed)) {
+                    valorFinal = parsed;
+                }
             }
         }
 
