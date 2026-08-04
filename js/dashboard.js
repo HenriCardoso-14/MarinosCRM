@@ -79,10 +79,14 @@ async function loadDashboardData() {
 async function renderVencimentos() {
     const today = new Date();
     const nextWeek = new Date();
-    nextWeek.setDate(nextWeek.getDate() + 7);
+    nextWeek.setDate(today.getDate() + 7);
     
-    const todayStr = today.toISOString().split('T')[0];
-    const nextWeekStr = nextWeek.toISOString().split('T')[0];
+    const formatYMD = (d) => {
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+
+    const todayStr = formatYMD(today);
+    const nextWeekStr = formatYMD(nextWeek);
 
     const { data: vencimentos, error } = await db
         .from('assinaturas')
