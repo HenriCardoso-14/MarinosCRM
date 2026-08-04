@@ -1,0 +1,273 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-bg: #050505; /* Preto quase absoluto */
+    --secondary-bg: #121212; /* Cinza super escuro para o menu */
+    --glass-bg: #141414; /* Cartões escuros */
+    --glass-border: rgba(232, 183, 95, 0.3); /* Borda dourada suave */
+    --accent: #e8b75f; /* Dourado */
+    --accent-hover: #d2a146;
+    --text-main: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.6);
+    --danger: #ef4444;
+    --success: #10b981;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--primary-bg);
+    color: var(--text-main);
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Sidebar & Navigation */
+.sidebar {
+    background: var(--secondary-bg);
+    border-right: 1px solid var(--glass-border);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+}
+
+.nav-link {
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--text-main);
+    background: rgba(232, 183, 95, 0.15);
+    color: var(--accent);
+}
+
+.nav-link i {
+    font-size: 1.2rem;
+    width: 24px;
+    text-align: center;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+/* Buttons */
+.btn-accent {
+    background-color: var(--accent);
+    color: #2f2525;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    transition: all 0.2s ease;
+}
+
+.btn-accent:hover {
+    background-color: var(--accent-hover);
+    color: #2f2525;
+    transform: scale(1.02);
+}
+
+.btn-glass {
+    background: rgba(232, 183, 95, 0.1);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    transition: all 0.2s ease;
+}
+
+.btn-glass:hover {
+    background: rgba(232, 183, 95, 0.2);
+    color: var(--accent);
+}
+
+/* Form Inputs - High Contrast */
+.form-control, .form-select {
+    background-color: #1a1a1a !important;
+    border: 1px solid var(--glass-border) !important;
+    color: #ffffff !important;
+    border-radius: 8px;
+    padding: 0.75rem;
+}
+
+.form-control::placeholder, .form-select::placeholder {
+    color: rgba(255,255,255,0.4) !important;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: #222222 !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 0.25rem rgba(232, 183, 95, 0.25) !important;
+    color: #ffffff !important;
+}
+
+/* Modal */
+.modal-content {
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    border-radius: 16px;
+}
+.modal-header {
+    border-bottom: 1px solid var(--glass-border);
+}
+.modal-footer {
+    border-top: 1px solid var(--glass-border);
+}
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Tables */
+.table-glass {
+    color: var(--text-main);
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    width: 100%;
+}
+
+.table-glass th {
+    border: none;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    padding: 1rem;
+}
+
+.table-glass td {
+    background: var(--glass-bg);
+    border-top: 1px solid var(--glass-border) !important;
+    border-bottom: 1px solid var(--glass-border) !important;
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.table-glass td:first-child {
+    border-left: 1px solid var(--glass-border);
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+.table-glass td:last-child {
+    border-right: 1px solid var(--glass-border);
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+/* Layout Utilities */
+.main-content {
+    padding: 2rem;
+}
+
+/* Badges */
+.badge-active {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 0.4em 0.8em;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.8em;
+}
+
+.badge-inactive {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 0.4em 0.8em;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.8em;
+}
+
+/* Toast */
+.toast {
+    background-color: var(--secondary-bg) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--glass-border) !important;
+}
+
+/* -------------------------------------
+   MOBILE & PWA OPTIMIZATIONS
+-------------------------------------- */
+@media (max-width: 767.98px) {
+    body {
+        padding-bottom: 80px; /* Space for bottom navbar */
+    }
+    
+    .main-content {
+        padding: 1rem; /* Less padding on small screens */
+    }
+
+    /* Prevent iOS auto-zoom on inputs */
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* Bottom Navigation Bar (Mobile App Style) */
+.mobile-bottom-nav {
+    background-color: var(--secondary-bg);
+    border-top: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+    z-index: 1040;
+}
+
+.mobile-nav-item {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.5rem 0;
+    transition: color 0.2s ease;
+}
+
+.mobile-nav-item i {
+    font-size: 1.25rem;
+    margin-bottom: 4px;
+}
+
+.mobile-nav-item:hover, .mobile-nav-item.active {
+    color: var(--accent);
+}
+
+/* Offcanvas Mobile Menu */
+.offcanvas {
+    background-color: var(--secondary-bg) !important;
+    border-left: 1px solid var(--glass-border);
+}
+
+.offcanvas-header {
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.offcanvas-title {
+    color: var(--accent);
+    font-weight: 700;
+}

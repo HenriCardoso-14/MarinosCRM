@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Marino's CRM - Cortes & Serviços</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <!-- Sidebar -->
+            <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 sidebar d-none d-md-block">
+                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+                    <a href="index.html" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none border-bottom border-secondary w-100 mb-4">
+                        <span class="fs-4 d-none d-sm-inline fw-bold text-accent" style="color: var(--accent);">Marino's <span style="color: var(--text-main);">CRM</span></span>
+                    </a>
+                    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100" id="menu">
+                        <li class="nav-item w-100 mb-2">
+                            <a href="index.html" class="nav-link">
+                                <i class="fa-solid fa-chart-pie"></i> <span class="ms-1 d-none d-sm-inline">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item w-100 mb-2">
+                            <a href="clientes.html" class="nav-link">
+                                <i class="fa-solid fa-users"></i> <span class="ms-1 d-none d-sm-inline">Clientes</span>
+                            </a>
+                        </li>
+                        <li class="nav-item w-100 mb-2">
+                            <a href="assinaturas.html" class="nav-link">
+                                <i class="fa-solid fa-star"></i> <span class="ms-1 d-none d-sm-inline">Assinaturas</span>
+                            </a>
+                        </li>
+                        <li class="nav-item w-100 mb-2">
+                            <a href="cortes.html" class="nav-link active">
+                                <i class="fa-solid fa-scissors"></i> <span class="ms-1 d-none d-sm-inline">Cortes & Serviços</span>
+                            </a>
+                        </li>
+                        <li class="nav-item w-100 mb-2">
+                            <a href="produtos.html" class="nav-link">
+                                <i class="fa-solid fa-box-open"></i> <span class="ms-1 d-none d-sm-inline">Produtos</span>
+                            </a>
+                        </li>
+                        <li class="nav-item w-100 mb-2">
+                            <a href="financeiro.html" class="nav-link">
+                                <i class="fa-solid fa-wallet"></i> <span class="ms-1 d-none d-sm-inline">Financeiro</span>
+                            </a>
+                        </li>
+                        <li class="nav-item w-100 mb-2 mt-4">
+                            <a href="importador.html" class="nav-link">
+                                <i class="fa-solid fa-file-excel"></i> <span class="ms-1 d-none d-sm-inline">Importar Dados</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col py-3 main-content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">Histórico de Atendimentos</h2>
+                    <button class="btn btn-accent" onclick="openCorteModal()">
+                        <i class="fa-solid fa-plus me-2"></i>Novo Atendimento
+                    </button>
+                </div>
+
+                <div class="glass-card p-0 overflow-hidden">
+                    <div class="table-responsive">
+                        <table class="table table-glass mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Cliente</th>
+                                    <th>Item Realizado</th>
+                                    <th>Tipo</th>
+                                    <th>Valor Cobrado</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cortes-tbody">
+                                <tr><td colspan="6" class="text-center py-4">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Atendimento (Carrinho) -->
+    <div class="modal fade" id="corteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Novo Atendimento (Ponto de Venda)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Cliente</label>
+                            <select class="form-select" id="corteCliente" onchange="checkAssinaturaAtiva()">
+                                <option value="">Sem Cadastro (Avulso)</option>
+                            </select>
+                            <div id="statusAssinatura" class="form-text text-accent mt-1"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Data</label>
+                            <input type="date" class="form-control" id="corteData">
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-5">
+                            <select class="form-select" id="selectServico">
+                                <option value="">+ Adicionar Serviço...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-glass w-100 text-accent" onclick="addServico()">Adicionar</button>
+                        </div>
+                        <div class="col-md-5"></div>
+                    </div>
+                    <div class="row g-2 mb-4">
+                        <div class="col-md-5">
+                            <select class="form-select" id="selectProduto">
+                                <option value="">+ Adicionar Produto...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-glass w-100 text-accent" onclick="addProduto()">Adicionar</button>
+                        </div>
+                        <div class="col-md-5"></div>
+                    </div>
+
+                    <h6 class="text-muted mb-2">Carrinho de Itens</h6>
+                    <div class="table-responsive">
+                        <table class="table table-glass table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Cobrança</th>
+                                    <th>Valor</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="carrinhoTbody">
+                                <tr><td colspan="4" class="text-center py-2 text-muted">Carrinho vazio</td></tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="2" class="text-end">Total a Pagar:</th>
+                                    <th colspan="2" class="text-accent fs-5" id="carrinhoTotal">R$ 0,00</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-accent" onclick="salvarAtendimento()">Finalizar Atendimento</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav d-md-none fixed-bottom d-flex justify-content-around align-items-center">
+        <a href="index.html" class="mobile-nav-item d-flex flex-column align-items-center w-100 ">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Início</span>
+        </a>
+        <a href="clientes.html" class="mobile-nav-item d-flex flex-column align-items-center w-100 ">
+            <i class="fa-solid fa-users"></i>
+            <span>Clientes</span>
+        </a>
+        <a href="cortes.html" class="mobile-nav-item d-flex flex-column align-items-center w-100 active">
+            <i class="fa-solid fa-scissors"></i>
+            <span>Serviços</span>
+        </a>
+        <a href="#" class="mobile-nav-item d-flex flex-column align-items-center w-100" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+            <i class="fa-solid fa-bars"></i>
+            <span>Menu</span>
+        </a>
+    </nav>
+
+    <!-- Offcanvas Mobile Menu -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="mobileMenuLabel">Marino's CRM</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column gap-3">
+            <a href="assinaturas.html" class="nav-link"><i class="fa-solid fa-star text-accent" style="width:24px; text-align:center;"></i> Assinaturas</a>
+            <a href="produtos.html" class="nav-link"><i class="fa-solid fa-box-open text-accent" style="width:24px; text-align:center;"></i> Produtos</a>
+            <a href="financeiro.html" class="nav-link"><i class="fa-solid fa-wallet text-accent" style="width:24px; text-align:center;"></i> Financeiro</a>
+            <hr class="border-secondary">
+            <a href="importador.html" class="nav-link"><i class="fa-solid fa-file-excel text-accent" style="width:24px; text-align:center;"></i> Importar Dados</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/cortes.js"></script>
+</body>
+</html>
