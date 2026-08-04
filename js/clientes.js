@@ -35,14 +35,14 @@ async function loadClientes() {
             <tr>
                 <td class="text-muted fw-bold">#${cliente.matricula || '---'}</td>
                 <td class="fw-medium">${cliente.nome}</td>
-                <td>
+                <td class="d-none d-md-table-cell">
                     ${cliente.telefone ? `
                     <a href="${getWhatsAppLink(cliente.telefone)}" target="_blank" class="text-success text-decoration-none">
                         <i class="fa-brands fa-whatsapp me-1"></i> ${cliente.telefone}
                     </a>
                     ` : '<span class="text-muted">Não informado</span>'}
                 </td>
-                <td>${formatDate(cliente.data_cadastro)}</td>
+                <td class="d-none d-md-table-cell">${formatDate(cliente.data_cadastro)}</td>
                 <td>
                     <button class="btn btn-sm btn-glass text-accent me-2" onclick="editCliente('${cliente.id}')" title="Editar">
                         <i class="fa-solid fa-pen"></i>

@@ -87,8 +87,8 @@ async function loadAssinaturas() {
             return `
             <tr>
                 <td class="fw-medium">${a.clientes.nome}</td>
-                <td>${a.planos.nome}</td>
-                <td>${formatCurrency(a.valor)}</td>
+                <td class="d-none d-md-table-cell">${a.planos.nome}</td>
+                <td class="d-none d-md-table-cell">${formatCurrency(a.valor)}</td>
                 <td>${formatDate(a.data_inicio)}</td>
                 <td class="${isVencida ? 'text-danger fw-bold' : ''}">${formatDate(a.data_vencimento)}</td>
                 <td><span class="${badgeClass}">${statusText}</span></td>

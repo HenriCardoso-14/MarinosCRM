@@ -54,7 +54,7 @@ async function loadFinanceiro() {
                 const color = m.tipo === 'Entrada' ? 'text-success' : 'text-danger';
                 return `
                 <tr>
-                    <td>${formatDate(m.data)}</td>
+                    <td class="d-none d-md-table-cell">${formatDate(m.data)}</td>
                     <td class="fw-medium">${m.descricao}</td>
                     <td>${m.categoria || '-'}</td>
                     <td><span class="${color} fw-bold">${m.tipo}</span></td>

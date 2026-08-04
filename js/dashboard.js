@@ -11,7 +11,14 @@ async function loadDashboardData() {
         const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
         const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
         
-        // 1. Clientes Ativos (com corte nos ultimos 30 dias)
+        // 1. Clientes Ativos
+        // Ativo = (Assinante Ativo) + (Não-assinante com corte nos últimos 30 dias)
+        const { data: assinaturasAtivas, error: errAss } = await db.from('assinaturas').select('cliente_id').eq('situacao', 'Ativo');
+        if (errAss) throw errAss;
+        
+        const assinantesIds = assinaturasAtivas.map(a => a.cliente_id);
+        const uniqueAssinantes = new Set(assinantesIds).size;
+
         const thirtyDaysAgo = new Date(today.setDate(today.getDate() - 30)).toISOString().split('T')[0];
         const { data: cortesRecentes, error: errorCortesRecentes } = await db
             .from('cortes')
@@ -20,8 +27,13 @@ async function loadDashboardData() {
         
         if (errorCortesRecentes) throw errorCortesRecentes;
         
-        const clientesUnicosAtivos = new Set(cortesRecentes.filter(c => c.cliente_id).map(c => c.cliente_id)).size;
-        document.getElementById('total-clientes-ativos').textContent = clientesUnicosAtivos;
+        const recentesNaoAssinantes = cortesRecentes
+            .map(c => c.cliente_id)
+            .filter(id => id && !assinantesIds.includes(id));
+            
+        const uniqueRecentesNaoAssinantes = new Set(recentesNaoAssinantes).size;
+        
+        document.getElementById('total-clientes-ativos').textContent = uniqueAssinantes + uniqueRecentesNaoAssinantes;
 
         // 2. Assinaturas Ativas
         const { count: countAssinaturas, error: errorAssinaturas } = await db

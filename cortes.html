@@ -169,6 +169,38 @@
         </div>
     </div>
 
+    <!-- Modal Configurar Item -->
+    <div class="modal fade" id="itemModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adicionar Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 id="itemModalNome" class="text-accent mb-3">Nome do Item</h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Cobrança</label>
+                        <select class="form-select" id="itemModalTipoCobranca" onchange="toggleItemValor()">
+                            <option value="Avulso">Valor Avulso</option>
+                            <option value="Assinatura" id="optionAssinatura">Debitar da Assinatura</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="divItemValor">
+                        <label class="form-label text-muted">Valor Cobrado (R$)</label>
+                        <input type="number" class="form-control" id="itemModalValor" step="0.01" min="0">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-accent" onclick="confirmAddItem()">Adicionar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Mobile Bottom Navigation -->
     <nav class="mobile-bottom-nav d-md-none fixed-bottom d-flex justify-content-around align-items-center">
         <a href="index.html" class="mobile-nav-item d-flex flex-column align-items-center w-100 ">

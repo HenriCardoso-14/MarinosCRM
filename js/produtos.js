@@ -29,7 +29,7 @@ async function loadProdutos() {
                 <td class="fw-medium">${p.nome}</td>
                 <td>${p.categoria || '-'}</td>
                 <td class="${estoqueBaixo}">${p.quantidade} un</td>
-                <td>${formatCurrency(p.valor_compra)}</td>
+                <td class="d-none d-md-table-cell">${formatCurrency(p.valor_compra)}</td>
                 <td>${formatCurrency(p.valor_venda)}</td>
                 <td>
                     <button class="btn btn-sm btn-glass text-success me-1" onclick="openVenderModal('${p.id}', '${p.nome}', ${p.valor_venda}, ${p.quantidade})" title="Registrar Venda" ${p.quantidade <= 0 ? 'disabled' : ''}>
